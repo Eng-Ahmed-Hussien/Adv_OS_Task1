@@ -69,4 +69,3 @@ There are several strategies for implementing compaction, one of which is sugges
 
 ---
 
-Initial code taken from [this repository.](https://github.com/Sparkadelic177/Contiguous_Memory_Allocation_Simulator/tree/master)
