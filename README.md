@@ -1,71 +1,206 @@
-# Contiguous-Memory-Allocation-Project
-**The project was made using C language on Linux platform.**
+<style>
+  body {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    background: #fbfbfb;
+    color: #2d2d2d;
+    padding: 20px;
+    line-height: 1.6;
+  }
+  h1, h2, h3, h4 {
+    color: #2c3e50;
+    border-bottom: 2px solid #2980b9;
+    padding-bottom: 5px;
+  }
+  pre, code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    background: #f0f0f0;
+    color: #2d2d2d;
+    padding: 10px;
+    border-radius: 4px;
+    overflow-x: auto;
+  }
+  .terminal {
+    background: #1e1e1e;
+    color: #dcdcdc;
+    font-family: 'Consolas', 'Courier New', monospace;
+    padding: 10px;
+    border-radius: 4px;
+  }
+  a {
+    color: #2980b9;
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+  .note {
+    background:rgb(18, 176, 255);
+    border-left: 5px solid #3498db;
+    padding: 10px;
+    margin: 10px 0;
+  }
+</style>
 
-## Description of the project
-This project will involve managing a contiguous region of memory of size MAX where addresses may range from 0 ... MAX − 1. Your program must respond to four different requests:
-1. Request for a contiguous block of memory
-2. Release of a contiguous block of memory
-3. Compact unused holes of memory into one single block
-4. Report the regions of free and allocated memory
+# Contiguous Memory Allocator 🌟 
 
-Your program will be passed the initial amount of memory at startup. For example, the following initializes the program with 1 MB (1,048,576 bytes) of memory:
+Welcome to the **Contiguous Memory Allocator** project! This simulation in C demonstrates how operating systems manage memory by allocating contiguous blocks. Enjoy an interactive, cross-platform journey into dynamic memory allocation.
 
-`./allocator 1048576`
+## Features ✨
 
-Once your program has started, it will present the user with the following prompt:
+- **Dynamic Memory Request:**  
+  Allocate memory blocks using three elegant strategies:
+  - **First Fit:** Uses the first block that is large enough.
+  - **Best Fit:** Selects the smallest block that fits to reduce waste.
+  - **Worst Fit:** Chooses the largest block, leaving a generous free space.
 
-`allocator>`
+- **Memory Release:**  
+  Free allocated memory and merge adjacent free blocks to create larger continuous free space.
 
-It will then respond to the following commands: RQ (request), RL (release), C (compact), STAT (status report), and X (exit).
+- **Memory Compaction:**  
+  Compact memory by merging contiguous free blocks, reducing fragmentation.
 
-A request for 40,000 bytes will appear as follows:
+- **Status Reporting:**  
+  Visualize the current memory layout, including both allocated and free blocks.
 
-`allocator>RQ P0 40000 W`
+- **Interactive Command Loop:**  
+  Run the program continuously and interact via commands. No matter your operating system, the instructions below will help you get started.
 
-Similarly, a release will appear as:
+## Future Enhancements 🔮
 
-`allocator>RL P0`
+- **Wait Queue:** Add a queue for processes waiting for memory.
+- **Code Refactoring:** Modularize repeated code segments.
+- **Enhanced Merging:** Improve the release and compaction functions for smoother operation.
 
-This command will release the memory that has been allocated to process P0. 
+## Compilation 🔨
 
-The command for compaction is entered as:
+### On Windows
 
-`allocator>C`
+Use a compiler like [MinGW](http://www.mingw.org/) or Visual Studio's Developer Command Prompt. For example, with MinGW:
 
-This command will compact unused holes of memory into one region.
-
-Finally, the STAT command for reporting the status of memory is entered
-as:
-
-`allocator>STAT`
-
-Given this command, your program will report the regions of memory that are allocated and the regions that are unused. 
-For example, one possible arrangement of memory allocation would be as follows:
-
-```Addresses [0:315000] Process P1
-Addresses [315001: 512500] Process P3
-Addresses [512501:625575] Unused
-Addresses [625575:725100] Process P6
-Addresses [725001] . . .
+```bash
+gcc -o allocator.exe contiguous_memory_allocator.c
 ```
 
-### Allocating Memory
-Your program will allocate memory using one of the three approaches depending on the flag that is passed to the RQ command. The flags are:
+### On Linux/macOS
 
-• F—first fit
+Simply use GCC:
 
-• B—best fit
+```bash
+gcc -o allocator contiguous_memory_allocator.c
+```
 
-• W—worst fit
+## Usage ⚡
 
-This will require that your program keep track of the different holes representing available memory. When a request for memory arrives, it will allocate the memory from one of the available holes based on the allocation strategy. If there is insufficient memory to allocate to a request, it will output an error message and reject the request.
+### Running the Program
 
-Your program will also need to keep track of which region of memory has been allocated to which process. This is necessary to support the STAT The first parameter to the RQ command is the new process that requires the memory, followed by the amount of memory being requested, and finally the strategy. (In this situation, “W” refers to worst fit.) command and is also needed when memory is released via the RL command, as the process releasing memory is passed to this command. If a partition being released is adjacent to an existing hole, be sure to combine the two holes into a single hole.
+- **With a Command-line Argument:**  
+  Supply the initial memory size directly.
 
-### Compaction
-If the user enters the C command, your program will compact the set of holes into one larger hole. For example, if you have four separate holes of size 550 KB, 375 KB, 1,900 KB, and 4,500 KB, your program will combine these four holes into one large hole of size 7,325 KB.
+  **Windows Example:**
 
-There are several strategies for implementing compaction, one of which is suggested in Section 9.2.3. Be sure to update the beginning address of any processes that have been affected by compaction.
+  ```bash
+  allocator.exe 1000
+  ```
 
----
+  **Linux/macOS Example:**
 
+  ```bash
+  ./allocator 1000
+  ```
+
+  *(This initializes the memory with 999 bytes after internal adjustments.)*
+
+- **Without a Command-line Argument:**  
+  The program will prompt you to enter the initial memory size:
+
+  ```terminal
+  allocator.exe
+  Enter initial memory size: 1000
+  ```
+
+  or
+
+  ```terminal
+  ./allocator
+  Enter initial memory size: 1000
+  ```
+
+### Commands
+
+At the `allocator>` prompt, use these commands:
+
+- **RQ `<ProcessID>` `<Space>` `<Algorithm>`**  
+  Request a memory block for a process.  
+  - `<ProcessID>`: A 3-character identifier.
+  - `<Space>`: Amount of memory requested.
+  - `<Algorithm>`: Allocation strategy (`F` for First Fit, `B` for Best Fit, `W` for Worst Fit).
+  
+  **Example:**
+
+  ```terminal
+  RQ p1 100 B
+  ```
+
+- **RL `<ProcessID>`**  
+  Release memory allocated to a process.
+  
+  **Example:**
+
+  ```terminal
+  RL p1
+  ```
+
+- **C**  
+  Compact memory by merging adjacent free blocks.
+
+- **STAT**  
+  Display the current memory status.
+
+- **X**  
+  Exit the program.
+
+## 💡 Example Session
+
+Below is an example session, styled for terminal output, that works across platforms:
+
+```terminal
+C:\Adv_OS_Task1>allocator.exe
+Enter initial memory size: 1000
+Initialize free space: 999 bytes
+allocator> RQ p1 100 B
+allocator> STAT
+Total available space: 899 bytes
+Addresses [0 : 100] -> Process: p1
+Addresses [101 : 999] -> Process: FREE
+allocator> RQ p2 50 F
+allocator> STAT
+Total available space: 849 bytes
+Addresses [0 : 100] -> Process: p1
+Addresses [101 : 150] -> Process: p2
+Addresses [151 : 999] -> Process: FREE
+allocator> RL p1
+allocator> STAT
+Total available space: 949 bytes
+Addresses [0 : 100] -> Process: FREE
+Addresses [101 : 150] -> Process: p2
+Addresses [151 : 999] -> Process: FREE
+allocator> C
+allocator> STAT
+Total available space: 949 bytes
+Addresses [0 : 150] -> Process: FREE
+Addresses [151 : 999] -> Process: FREE
+allocator> X
+```
+
+In this session:
+
+- **RQ p1 100 B:** Allocates 100 bytes for process "p1" using Best Fit.
+- **STAT:** Displays the updated memory layout.
+- **RQ p2 50 F:** Allocates 50 bytes for process "p2" using First Fit.
+- **RL p1:** Releases memory allocated to "p1".
+- **C:** Compacts memory by merging free blocks.
+- **X:** Exits the program.
+
+## 🎉 Conclusion
+
+This simulation offers an engaging, cross-platform way to explore contiguous memory allocation, fragmentation, and memory compaction. Whether you're on Windows, Linux, or macOS, dive in and enjoy the art of memory management with clarity and style!

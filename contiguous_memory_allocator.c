@@ -1,11 +1,12 @@
 /**
  * \file    contiguous_memory_allocator.c
  * \brief   Simulation of a contiguous memory allocator.
- * \details This program simulates a contiguous memory allocator that supports:
- *          1. Requesting memory using First Fit, Best Fit, or Worst Fit algorithms.
- *          2. Releasing allocated memory.
- *          3. Compacting memory by merging free blocks.
- *          4. Reporting the current memory allocation status.
+ *
+ * This program simulates a contiguous memory allocator that supports:
+ *   - Requesting memory using First Fit, Best Fit, or Worst Fit algorithms.
+ *   - Releasing allocated memory.
+ *   - Compacting memory by merging adjacent free blocks.
+ *   - Reporting the current memory allocation status.
  *
  * Compile:
  *     gcc -o allocator contiguous_memory_allocator.c
@@ -13,8 +14,8 @@
  * Run:
  *     On Windows: allocator.exe <initial_memory_size>
  *     On Unix-like systems: ./allocator <initial_memory_size>
- * 
- * If no command-line argument is provided, the program will prompt for the initial memory size.
+ *
+ * If no command-line argument is provided, the program prompts for the initial memory size.
  */
 
 #include <stdio.h>
@@ -22,24 +23,22 @@
 #include <string.h>
 #include <limits.h>
 
-#define FREE_LABEL "FREE"   // Label for free memory blocks
+#define FREE_LABEL "FREE"   // Label used for free memory blocks
 
-// Structure representing a block of memory.
 typedef struct Node {
-    int availableSpace;      // Size of the block (or free space available)
-    int startAddress;        // Starting address of the block
-    int endAddress;          // Ending address of the block
-    struct Node *next;       // Pointer to the next memory block in the list
-    char processId[100];     // Process identifier (or "FREE" for unallocated space)
+    int availableSpace;   // Size of this block (allocated or free)
+    int startAddress;     // Start address of the block
+    int endAddress;       // End address of the block
+    struct Node *next;    // Next block in the list
+    char processId[100];  // Process ID or FREE if unallocated
 } Node;
 
-// Global pointers for memory list management.
-Node *dummyHead;       // Dummy head node; its availableSpace tracks total free memory.
-Node *initialBlock;    // The first block of contiguous memory.
-Node *current;         // Temporary pointer used during traversals.
-int lastAddressSpace;  // The maximum allowed memory address (initial memory size).
+// Global variables for memory management.
+Node *dummyHead;      // Dummy head: tracks total free space
+Node *initialBlock;   // The initial free memory block
+Node *current;        // Temporary pointer for list traversal
+int lastAddressSpace; // Maximum address (initial memory size)
 
-// Function prototypes.
 void createFreeBlock(int spaceAllocated, int leftoverSpace);
 void mergeFreeBlocks();
 int processExists(const char processId[3]);
@@ -52,7 +51,9 @@ void compactMemory();
 void reportStatus();
 void cleanupMemory();
 
-// Create a free block for leftover space after an allocation.
+/*
+ * Creates a new free block for any leftover space after allocation.
+ */
 void createFreeBlock(int spaceAllocated, int leftoverSpace) {
     Node *newFreeBlock = (Node *)malloc(sizeof(Node));
     if (!newFreeBlock) {
@@ -63,40 +64,47 @@ void createFreeBlock(int spaceAllocated, int leftoverSpace) {
     newFreeBlock->availableSpace = leftoverSpace;
     newFreeBlock->startAddress = current->next->endAddress + 1;
     newFreeBlock->endAddress = newFreeBlock->startAddress + leftoverSpace;
-    if (newFreeBlock->endAddress > lastAddressSpace) {
+    if (newFreeBlock->endAddress > lastAddressSpace)
         newFreeBlock->endAddress = lastAddressSpace;
-    }
     newFreeBlock->next = current->next->next;
     current->next->next = newFreeBlock;
 }
 
-// Merge adjacent free blocks to maintain continuous free space.
+/*
+ * Merges adjacent free blocks to form a larger free block.
+ */
 void mergeFreeBlocks() {
-    Node *nodeToRemove = NULL;
-    if (strcmp(current->processId, FREE_LABEL) == 0 &&
-        current->next != NULL &&
-        strcmp(current->next->processId, FREE_LABEL) == 0) {
-        current->endAddress = current->next->endAddress;
-        current->availableSpace += current->next->availableSpace;
-        nodeToRemove = current->next;
-        current->next = current->next->next;
-        free(nodeToRemove);
+    current = dummyHead;
+    while (current && current->next) {
+        if (strcmp(current->processId, FREE_LABEL) == 0 &&
+            strcmp(current->next->processId, FREE_LABEL) == 0) {
+            current->endAddress = current->next->endAddress;
+            current->availableSpace += current->next->availableSpace;
+            Node *tempNode = current->next;
+            current->next = current->next->next;
+            free(tempNode);
+        } else {
+            current = current->next;
+        }
     }
 }
 
-// Check if a process is already allocated.
+/*
+ * Checks if a process with the given ID is already allocated.
+ */
 int processExists(const char processId[3]) {
     current = dummyHead;
     while (current->next != NULL) {
-        if (strcmp(current->next->processId, processId) == 0) {
+        if (strcmp(current->next->processId, processId) == 0)
             return 1;
-        }
         current = current->next;
     }
     return 0;
 }
 
-// Allocate memory using the First Fit algorithm.
+/*
+ * Allocates memory using the First Fit strategy.
+ */
 void allocateFirstFit(const char processId[3], int spaceRequested) {
     current = dummyHead;
     while (current->next != NULL) {
@@ -105,23 +113,26 @@ void allocateFirstFit(const char processId[3], int spaceRequested) {
             dummyHead->availableSpace -= spaceRequested;
             strcpy(current->next->processId, processId);
             current->next->endAddress = current->next->startAddress + spaceRequested;
+            int allocatedStart = current->next->startAddress;
+            int allocatedEnd = current->next->endAddress;
             int leftoverSpace = current->next->availableSpace - spaceRequested;
             current->next->availableSpace = spaceRequested;
-            if (leftoverSpace > 0) {
+            if (leftoverSpace > 0)
                 createFreeBlock(spaceRequested, leftoverSpace);
-            }
+            printf("Allocation Successful! Process %s allocated using First Fit. Block: [%d : %d]\n", processId, allocatedStart, allocatedEnd);
             return;
         }
         current = current->next;
     }
-    printf("No sufficient space to allocate process %s (%d bytes)\n", processId, spaceRequested);
+    printf("Not enough space to allocate %d bytes for process %s using First Fit.\n", spaceRequested, processId);
 }
 
-// Allocate memory using the Best Fit algorithm.
+/*
+ * Allocates memory using the Best Fit strategy.
+ */
 void allocateBestFit(const char processId[3], int spaceRequested) {
     int smallestFit = INT_MAX;
     current = dummyHead;
-    // Find the smallest free block that can fit the requested space.
     while (current->next != NULL) {
         if (strcmp(current->next->processId, FREE_LABEL) == 0 &&
             current->next->availableSpace >= spaceRequested &&
@@ -130,7 +141,6 @@ void allocateBestFit(const char processId[3], int spaceRequested) {
         }
         current = current->next;
     }
-    // Allocate in the identified block.
     current = dummyHead;
     while (current->next != NULL) {
         if (strcmp(current->next->processId, FREE_LABEL) == 0 &&
@@ -138,23 +148,26 @@ void allocateBestFit(const char processId[3], int spaceRequested) {
             dummyHead->availableSpace -= spaceRequested;
             strcpy(current->next->processId, processId);
             current->next->endAddress = current->next->startAddress + spaceRequested;
+            int allocatedStart = current->next->startAddress;
+            int allocatedEnd = current->next->endAddress;
             int leftoverSpace = current->next->availableSpace - spaceRequested;
             current->next->availableSpace = spaceRequested;
-            if (leftoverSpace > 0) {
+            if (leftoverSpace > 0)
                 createFreeBlock(spaceRequested, leftoverSpace);
-            }
+            printf("Allocation Successful! Process %s allocated using Best Fit. Block: [%d : %d]\n", processId, allocatedStart, allocatedEnd);
             return;
         }
         current = current->next;
     }
-    printf("No sufficient space to allocate process %s (%d bytes)\n", processId, spaceRequested);
+    printf("Not enough space to allocate %d bytes for process %s using Best Fit.\n", spaceRequested, processId);
 }
 
-// Allocate memory using the Worst Fit algorithm.
+/*
+ * Allocates memory using the Worst Fit strategy.
+ */
 void allocateWorstFit(const char processId[3], int spaceRequested) {
     int largestFit = INT_MIN;
     current = dummyHead;
-    // Find the largest free block available.
     while (current->next != NULL) {
         if (strcmp(current->next->processId, FREE_LABEL) == 0 &&
             current->next->availableSpace >= spaceRequested &&
@@ -163,7 +176,6 @@ void allocateWorstFit(const char processId[3], int spaceRequested) {
         }
         current = current->next;
     }
-    // Allocate in the identified block.
     current = dummyHead;
     while (current->next != NULL) {
         if (strcmp(current->next->processId, FREE_LABEL) == 0 &&
@@ -171,37 +183,42 @@ void allocateWorstFit(const char processId[3], int spaceRequested) {
             dummyHead->availableSpace -= spaceRequested;
             strcpy(current->next->processId, processId);
             current->next->endAddress = current->next->startAddress + spaceRequested;
+            int allocatedStart = current->next->startAddress;
+            int allocatedEnd = current->next->endAddress;
             int leftoverSpace = current->next->availableSpace - spaceRequested;
             current->next->availableSpace = spaceRequested;
-            if (leftoverSpace > 0) {
+            if (leftoverSpace > 0)
                 createFreeBlock(spaceRequested, leftoverSpace);
-            }
+            printf("Allocation Successful! Process %s allocated using Worst Fit. Block: [%d : %d]\n", processId, allocatedStart, allocatedEnd);
             return;
         }
         current = current->next;
     }
-    printf("No sufficient space to allocate process %s (%d bytes)\n", processId, spaceRequested);
+    printf("Not enough space to allocate %d bytes for process %s using Worst Fit.\n", spaceRequested, processId);
 }
 
-// Dispatch a memory request based on the chosen algorithm.
-// 'F' for First Fit, 'B' for Best Fit, and 'W' for Worst Fit.
+/*
+ * Dispatches a memory request based on the chosen strategy.
+ * Valid options: "F" for First Fit, "B" for Best Fit, "W" for Worst Fit.
+ */
 void requestMemory(const char processId[3], int spaceRequested, const char algo[2]) {
     if (processExists(processId)) {
-        printf("Process %s is already allocated. Try a different ID.\n", processId);
+        printf("Process %s already exists. Choose a different ID.\n", processId);
         return;
     }
-    if (strcmp(algo, "W") == 0) {
+    if (strcmp(algo, "W") == 0)
         allocateWorstFit(processId, spaceRequested);
-    } else if (strcmp(algo, "B") == 0) {
+    else if (strcmp(algo, "B") == 0)
         allocateBestFit(processId, spaceRequested);
-    } else if (strcmp(algo, "F") == 0) {
+    else if (strcmp(algo, "F") == 0)
         allocateFirstFit(processId, spaceRequested);
-    } else {
-        printf("Invalid algorithm. Use 'F' for First Fit, 'B' for Best Fit, or 'W' for Worst Fit.\n");
-    }
+    else
+        printf("Invalid algorithm. Use 'F' (First Fit), 'B' (Best Fit), or 'W' (Worst Fit).\n");
 }
 
-// Release memory allocated to a process.
+/*
+ * Releases memory allocated to a process.
+ */
 void releaseMemory(const char processId[3]) {
     current = dummyHead;
     while (current->next != NULL) {
@@ -209,41 +226,42 @@ void releaseMemory(const char processId[3]) {
             dummyHead->availableSpace += current->next->availableSpace;
             strcpy(current->next->processId, FREE_LABEL);
             mergeFreeBlocks();
+            printf("Memory released for process %s.\n", processId);
             return;
         }
         current = current->next;
     }
-    printf("Process %s not found in memory.\n", processId);
+    printf("Process %s not found.\n", processId);
 }
 
-// Compact memory by merging all adjacent free blocks.
+/*
+ * Compacts memory by merging adjacent free blocks.
+ */
 void compactMemory() {
-    current = dummyHead;
-    while (current->next != NULL) {
-        if (strcmp(current->processId, FREE_LABEL) == 0 &&
-            current->next != NULL &&
-            strcmp(current->next->processId, FREE_LABEL) == 0) {
-            mergeFreeBlocks();
-        } else {
-            current = current->next;
-        }
-    }
+    mergeFreeBlocks();
+    printf("Memory compacted successfully.\n");
 }
 
-// Report the current status of memory allocation.
+/*
+ * Displays the current memory status.
+ */
 void reportStatus() {
+    printf("\n----- Memory Status -----\n");
     printf("Total available space: %d bytes\n", dummyHead->availableSpace);
     current = dummyHead;
     while (current->next != NULL) {
-        printf("Addresses [%d : %d] -> Process: %s\n", 
-               current->next->startAddress, 
-               current->next->endAddress, 
+        printf("Addresses [%d : %d] -> %s\n",
+               current->next->startAddress,
+               current->next->endAddress,
                current->next->processId);
         current = current->next;
     }
+    printf("-------------------------\n\n");
 }
 
-// Free all allocated memory blocks.
+/*
+ * Frees all allocated memory blocks.
+ */
 void cleanupMemory() {
     Node *tempNode;
     while (dummyHead != NULL) {
@@ -253,22 +271,26 @@ void cleanupMemory() {
     }
 }
 
+/*
+ * Main function: initializes memory and handles user commands.
+ */
 int main(int argc, char *argv[]) {
     int initialMemory;
-    // Prompt for initial memory size if not provided as a command-line argument.
+    printf("=== Welcome to the Contiguous Memory Allocator ===\n");
+    
+    // Get initial memory size from argument or prompt.
     if (argc < 2) {
         printf("Enter initial memory size: ");
         if (scanf("%d", &initialMemory) != 1) {
             fprintf(stderr, "Error reading memory size.\n");
             return EXIT_FAILURE;
         }
-        // Clear the newline left in the input buffer.
-        getchar();
+        getchar(); // Clear newline from input buffer.
     } else {
         initialMemory = atoi(argv[1]);
     }
     
-    // Adjust memory size by subtracting 1 (to account for addressing logic).
+    // Adjust memory size (subtract 1 for addressing logic).
     initialMemory -= 1;
     if (initialMemory <= 0) {
         fprintf(stderr, "Error: Invalid memory size.\n");
@@ -294,61 +316,59 @@ int main(int argc, char *argv[]) {
     
     lastAddressSpace = initialMemory;
     
-    // Display the initial free memory and the command prompt.
-    printf("Initialize free space: %d bytes\n", dummyHead->availableSpace);
-    printf("allocator> ");
-    fflush(stdout);
+    printf("\nMemory initialized with %d free bytes.\n", dummyHead->availableSpace);
     
-    // Main command loop.
+    // Display command instructions.
+    printf("Commands:\n");
+    printf("  RQ <ProcessID> <Space> <Algorithm>  (e.g., RQ p1 100 B)\n");
+    printf("  RL <ProcessID>                      (Release memory)\n");
+    printf("  C                                   (Compact memory)\n");
+    printf("  STAT                                (Display memory status)\n");
+    printf("  X                                   (Exit)\n\n");
+    
     char command[128];
     char requestType[5];
     char processId[3];
     int spaceRequested;
     char algoType[2];
     
-    while (fgets(command, sizeof(command), stdin) != NULL) {
-        // Remove trailing newline.
-        command[strcspn(command, "\n")] = '\0';
+    while (1) {
+        printf("Command > ");
+        if (!fgets(command, sizeof(command), stdin))
+            break;
+        command[strcspn(command, "\n")] = '\0';  // Remove newline
         
         if (sscanf(command, "%s", requestType) < 1) {
-            fprintf(stderr, "Invalid command. Please try again.\n");
-            printf("allocator> ");
+            printf("Invalid command. Try again.\n");
             continue;
         }
         
-        // Exit the loop if the command is "X".
-        if (strcmp("X", requestType) == 0) {
+        if (strcmp("X", requestType) == 0)
             break;
-        }
         
         if (strcmp("RQ", requestType) == 0) {
-            // Request memory: RQ <ProcessID> <Space> <Algorithm>
+            // Format: RQ <ProcessID> <Space> <Algorithm>
             if (sscanf(command, "%s %s %d %s", requestType, processId, &spaceRequested, algoType) != 4) {
-                printf("Invalid RQ command format. Use: RQ <ProcessID> <Space> <Algorithm>\n");
+                printf("Usage: RQ <ProcessID> <Space> <Algorithm>\n");
             } else {
                 requestMemory(processId, spaceRequested, algoType);
             }
         } else if (strcmp("RL", requestType) == 0) {
-            // Release memory: RL <ProcessID>
             if (sscanf(command, "%s %s", requestType, processId) != 2) {
-                printf("Invalid RL command format. Use: RL <ProcessID>\n");
+                printf("Usage: RL <ProcessID>\n");
             } else {
                 releaseMemory(processId);
             }
         } else if (strcmp("C", requestType) == 0) {
-            // Compact memory.
             compactMemory();
         } else if (strcmp("STAT", requestType) == 0) {
-            // Report memory status.
             reportStatus();
         } else {
             printf("Unrecognized command. Valid commands: RQ, RL, C, STAT, X\n");
         }
-        
-        printf("allocator> ");
-        fflush(stdout);
     }
     
+    printf("Exiting allocator. Goodbye!\n");
     cleanupMemory();
     return EXIT_SUCCESS;
 }
