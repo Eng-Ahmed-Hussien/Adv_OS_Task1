@@ -148,7 +148,7 @@ Exiting allocator. Goodbye!
 ## Team Members
 
 - **[Eng/ Youssif Seliem]** :
-  - Supervisor | Adv OS Assistant Lecturer
+  - **Role** : Supervisor | Adv OS Assistant Lecturer
 - **Ahmed Hussien El Sayed** :
   - **Role** : Project Lead | Web Developer
   - **Academic ID**: 15210408
