@@ -145,7 +145,27 @@ Exiting allocator. Goodbye!
   <strong>Fun Fact:</strong> The allocator adjusts memory size by -1 internally—999 bytes from 1000 keeps the math tight!
 </div>
 
-## 🌟 Why You’ll Love This
+## Team Members
+
+- **[Eng/ Youssif Seliem]** :
+  - Supervisor | Adv OS Assistant Lecturer
+- **Ahmed Hussien El Sayed** :
+  - **Role** : Project Lead | Web Developer
+  - **Academic ID**: 15210408
+- **Eslam Sa3d Gom3a Mohamed** :
+  - **Role** : Python Developer | Documentation Specialist
+  - **Academic ID**: 
+- **Asmaa Emad Abd-El3lem** : 15210066
+  - **Role** : Developer | Code Tester
+  - **Academic ID**: 15210075
+- **Eman Ayman Mabrouk** :
+  - **Role** : Developer | Documentation Specialist
+  - **Academic ID**: 15210086
+- **Mostafa......** :
+  - **Role** : Tester| Documentation Specialist
+  - **Academic ID**:
+
+## Why You’ll Love This 🌟
 
 This isn’t just a program—it’s a playground! Explore memory allocation, tackle fragmentation, and master compaction, all with a sleek, cross-platform vibe. Whether you’re on Windows, Linux, or macOS, this tool invites you to play, learn, and conquer the art of memory management.  
 
