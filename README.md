@@ -1,90 +1,3 @@
- <style>
-  body {
-    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-    background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
-    color: #2d2d2d;
-    padding: 30px;
-    line-height: 1.8;
-    animation: fadeIn 1s ease-in-out;
-  }
-  @keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-  }
-  h1 {
-    color: #00695c;
-    font-size: 2.5em;
-    text-align: center;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-    border-bottom: 3px solid #26a69a;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-  }
-  h2, h3, h4 {
-    color: #00695c;
-    border-bottom: 2px dashed #26a69a;
-    padding-bottom: 8px;
-    transition: color 0.3s ease;
-  }
-  h2:hover, h3:hover, h4:hover {
-    color: #00897b;
-  }
-  pre, code {
-    font-family: 'Fira Code', 'Consolas', monospace;
-    color:rgb(215, 166, 19);
-    background: #eceff1;
-    padding: .3rem;
-    border-radius: 8px;
-    overflow-x: auto;
-  }
-  pre{
-    background: #263238;
-    color :rgb(36, 20, 20)!important;
-    font-family: 'Fira Code', 'Consolas', monospace;
-    border-radius: 8px;
-    margin: 10px 0;
-  }
-  a {
-    color: #0288d1;
-    text-decoration: none;
-    font-weight: bold;
-  }
-  a:hover {
-    color: #01579b;
-    text-decoration: underline;
-  }
-  .note {
-    background: #e1f5fe;
-    border-left: 6px solid #0288d1;
-    padding: 15px;
-    border-radius: 5px;
-    margin: 15px 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
-  }
-  .note:hover {
-    transform: scale(1.02);
-  }
-  .button {
-    display: inline-block;
-    padding: 10px 20px;
-    background: #26a69a;
-    color: white;
-    border-radius: 5px;
-    text-align: center;
-    text-decoration: none;
-    margin: 5px;
-    transition: background 0.3s ease;
-  }
-  .button:hover {
-    background: #00897b;
-  }
-  .emoji {
-    font-size: 1.5em;
-    margin: 0 5px;
-  }
-</style>
-
 # Contiguous Memory Allocator 🚀
 
 Welcome to the **Contiguous Memory Allocator**—an interactive C-based simulation that brings the magic of memory management to life! Whether you're a student, a coder, or just curious, dive into this dynamic tool and explore how operating systems juggle memory like cosmic wizards. Ready to allocate, release, and compact your way to mastery? Let’s go! 🌟
@@ -97,25 +10,25 @@ Welcome to the **Contiguous Memory Allocator**—an interactive C-based simulati
   - **Best Fit (B):** Picks the coziest block to minimize waste—efficiency at its finest!  
   - **Worst Fit (W):** Grabs the biggest block, leaving room for future adventures!  
 
-- **Memory Release** 🕊️  
+- **Memory Release**  
   Free up space and watch adjacent blocks merge into a seamless galaxy of free memory.
 
-- **Memory Compaction** 🧹  
+- **Memory Compaction**  
   Sweep away fragmentation by fusing free blocks into one tidy, contiguous expanse.
 
-- **Status Reporting** 📡  
+- **Status Reporting** 
   Peek into the memory universe with detailed snapshots of allocated and free blocks.
 
-- **Interactive Command Loop** 🎮  
+- **Interactive Command Loop**
   Engage with the allocator in real-time—works flawlessly on Windows, Linux, or macOS!
 
-## What’s Next on the Horizon? 🔮
+## What’s Next on the Horizon?
 
 - **Wait Queue:** Park processes in line when memory’s tight.  
 - **Code Polish:** Streamline the spells with modular magic.  
 - **Smarter Merging:** Enhance release and compaction for a smoother cosmic dance.
 
-## 🔧 Compilation Station
+## Compilation Station🔧
 
 ### Windows Warriors
 
@@ -133,22 +46,22 @@ Unleash GCC with ease:
 gcc -o allocator contiguous_memory_allocator.c
 ```
 
-<div class="note">
+<div style="background: #e1f5fe; border-left: 6px solid #0288d1; padding: 15px; border-radius: 5px; margin: 15px 0; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); transition: transform 0.3s ease;color:#322;">
   <strong>Pro Tip:</strong> Ensure your compiler is ready—GCC is your trusty wand for this adventure!
 </div>
 
-## ⚡ How to Launch Your Journey
+## How to Launch Your Journey ⚡
 
 ### Start the Engine  
 
 - **With a Size Boost:** Feed it memory at launch:  
-  **Windows:** 
+  **Windows:**
 
   ```bash
   allocator.exe 1000
   ```  
 
-  **Linux/macOS:** 
+  **Linux/macOS:**
 
   ```bash
   ./allocator 1000
@@ -161,7 +74,7 @@ gcc -o allocator contiguous_memory_allocator.c
 ```terminal
   ./allocator
   Enter initial memory size: 1000
-  ```
+```
 
 ### Command Your Universe
 
@@ -185,7 +98,7 @@ At the `Command >` prompt, wield these powers:
 - **X**  
   Exit the adventure gracefully.
 
-## Live Demo Time! 🎬
+## Example Usage Time
 
 Here’s a cosmic session to spark your imagination:
 
@@ -221,13 +134,14 @@ Command > X
 Exiting allocator. Goodbye!
 ```
 
-### What Happened?  
+### What Happened?
+
 - **RQ p1 100 B:** Best Fit snagged 100 bytes for `p1`.  
 - **RQ p2 50 F:** First Fit grabbed 50 bytes for `p2`.  
 - **RL p1:** Freed `p1`’s space.  
 - **C:** Merged free blocks into one stellar chunk.  
 
-<div class="note">
+<div style="background: #e1f5fe; border-left: 6px solid #0288d1; padding: 15px; border-radius: 5px; margin: 15px 0; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); transition: transform 0.3s ease; color:#322;">
   <strong>Fun Fact:</strong> The allocator adjusts memory size by -1 internally—999 bytes from 1000 keeps the math tight!
 </div>
 
@@ -235,4 +149,6 @@ Exiting allocator. Goodbye!
 
 This isn’t just a program—it’s a playground! Explore memory allocation, tackle fragmentation, and master compaction, all with a sleek, cross-platform vibe. Whether you’re on Windows, Linux, or macOS, this tool invites you to play, learn, and conquer the art of memory management.  
 
-<a href="#top" class="button">Go To Life Simulator 🚀</a>
+## Live Demo Time!
+
+<a href="https://eng-ahmed-hussien.github.io/Memory-Allocator/" style="display: inline-block; padding: 10px 20px; background: #26a69a; color: white; border-radius: 5px; text-align: center; text-decoration: none; margin: 5px; transition: background 0.3s ease;">Go To Life Simulator 🚀</a>
