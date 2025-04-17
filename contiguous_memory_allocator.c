@@ -66,7 +66,41 @@ void mergeFreeBlocks() {
         }
     }
 }
+/** Merges "all" FREE blocks (even if non‑contiguous) into one big FREE block at the end. */
+void mergeAllFreeMemory() {
+    int totalFree = 0;
+    Node *prev = dummyHead;
+    Node *curr = dummyHead->next;
+    Node *toRemove;
+    while (curr) {
+        if (strcmp(curr->processId, FREE_LABEL) == 0) {
+            totalFree += curr->availableSpace;
+            toRemove = curr;
+            curr = curr->next;
+            free(toRemove);
+            prev->next = curr;
+        } else {
+            prev = curr;
+            curr = curr->next;
+        }
+    }
 
+    if (totalFree > 0) {
+        Node *freeBlock = malloc(sizeof(Node));
+        if (!freeBlock) {
+            fprintf(stderr, "Error: Memory allocation failed in mergeAllFreeMemory.\n");
+            exit(EXIT_FAILURE);
+        }
+        strcpy(freeBlock->processId, FREE_LABEL);
+        freeBlock->availableSpace = totalFree;
+        freeBlock->startAddress = lastAddressSpace + 1 - totalFree;
+        freeBlock->endAddress   = lastAddressSpace;
+        freeBlock->next         = NULL;
+        prev->next              = freeBlock;
+    }
+
+    dummyHead->availableSpace = totalFree;
+}
 /** Checks if a process ID is already allocated. Returns 1 if exists, 0 otherwise. */
 int processExists(const char processId[3]) {
     current = dummyHead;
@@ -202,6 +236,7 @@ void releaseMemory(const char processId[3]) {
 /** Compacts memory by merging adjacent free blocks. */
 void compactMemory() {
     mergeFreeBlocks();
+    mergeAllFreeMemory();
     printf("Memory compacted successfully.\n");
 }
 
